@@ -99,7 +99,7 @@
       // pide los permisos
       function initCamera() {
         navigator.mediaDevices
-          .getUserMedia({video: true})
+          .getUserMedia(constraints)
           .then((stream) => {
             videoElement.srcObject = stream;
             // videoElement.play();
