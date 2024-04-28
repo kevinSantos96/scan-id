@@ -83,10 +83,10 @@
             "mediaDevices" in navigator &&
             "getUserMedia" in navigator.mediaDevices
           ) {
-            alert("tiene permiso");
+            //alert("tiene permiso");
             initCamera();
           } else {
-            alert("no tienes permiso");
+            console.log("no tienes permiso");
           }
         });
       function cerrarCamara() {
@@ -110,7 +110,7 @@
           })
           .catch((err) => {
             console.error("Error accessing camera:", err);
-            alert(err.message)
+            //alert(err.message)
           });
       }
 
