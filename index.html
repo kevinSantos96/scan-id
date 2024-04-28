@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <title>Guía de centrado de objeto en cámara</title>
+    <style>
+      body {
+        display: flex;
+      }
+      #cameraContainer {
+        position: relative;
+        width: 540px;
+        height: 480px;
+        margin: 0 auto;
+        border: 1px solid #000;
+        flex-direction: column;
+      }
+      #guideMask {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 70%;
+        height: 50%;
+        border: 3px dashed greenyellow;
+      }
+      #capture-btn {
+        display: block;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="btnOpenCam">Abrir Camara</button>
+    <button id="btnCloseCam" onclick="cerrarCamara()" style="display: none">
+      Cerrar Camera
+    </button>
+    <div id="cameraContainer" style="display: none">
+      <video id="videoElement" width="640" height="480" autoplay></video>
+      <canvas id="overlayCanvas" width="640" height="480"></canvas>
+      <div id="guideMask"></div>
+      <button id="capture-btn">Tomar Foto</button>
+    </div>
+
+    <script>
+      var cmaeraContainer = document.getElementById("cameraContainer");
+      var captureBtn = document.getElementById("capture-btn");
+      var videoElement = document.getElementById("videoElement");
+      const constraints = {
+        video: {
+      width: {
+        min: 1280,
+      },
+      height: {
+        min: 720,
+      },
+      facingMode: {
+        exact: 'environment'
+      }
+    }
+      };
+      const getCameraSelection = async () => {
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  const videoDevices = devices.filter(device => device.kind === 'videoinput');
+  const options = videoDevices.map(videoDevice => {
+    return `<option value="${videoDevice.deviceId}">${videoDevice.label}</option>`;
+  });
+  cameraOptions.innerHTML = options.join('');
+};
+
+      document
+        .getElementById("btnOpenCam")
+        .addEventListener("click", function () {
+          //mostrar elementos en pantalla
+          cmaeraContainer.style.display = "flex";
+          document.getElementById("btnCloseCam").style.display = "block";
+          document.getElementById("btnOpenCam").style.display = "none";
+          //verifica los permisos
+          if (
+            "mediaDevices" in navigator &&
+            "getUserMedia" in navigator.mediaDevices
+          ) {
+            alert("tiene permiso");
+            initCamera();
+          } else {
+            alert("no tienes permiso");
+          }
+        });
+      function cerrarCamara() {
+        //mostar y ocultar elementos en pantalla
+        cmaeraContainer.style.display = "none";
+        document.getElementById("btnCloseCam").style.display = "none";
+        document.getElementById("btnOpenCam").style.display = "block";
+      }
+
+      // pide los permisos
+      function initCamera() {
+        navigator.mediaDevices
+          .getUserMedia({video: true})
+          .then((stream) => {
+            videoElement.srcObject = stream;
+            // videoElement.play();
+          })
+          .catch((err) => {
+            console.error("Error accessing camera:", err);
+            alert(err.message)
+          });
+      }
+
+      // Actualizar la posición de la máscara de guía
+      function actualizarGuia(x, y) {
+        var guia = document.getElementById("guideMask");
+        guia.style.left = x + "px";
+        guia.style.top = y + "px";
+      }
+      //tomar y guardar la foto
+      captureBtn.addEventListener("click", function () {
+        //si existe el elemento lo elimina
+        if (document.getElementById("imgCapturada")) {
+          document
+            .querySelector("img")
+            .parentNode.removeChild(document.querySelector("img"));
+        }
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+        console.log(canvas.toDataURL());
+
+        // captura la imagen y la muestra en pantalla
+        const capturedImage = new Image();
+        capturedImage.setAttribute("id", "imgCapturada");
+        capturedImage.src = canvas.toDataURL("image/png");
+        document.body.appendChild(capturedImage);
+      });
+    </script>
+  </body>
+</html>
