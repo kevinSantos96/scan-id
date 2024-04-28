@@ -99,7 +99,11 @@
       // pide los permisos
       function initCamera() {
         navigator.mediaDevices
-          .getUserMedia(constraints)
+          .getUserMedia({
+            video: {
+              facingMode: "environment",
+            },
+          })
           .then((stream) => {
             videoElement.srcObject = stream;
             // videoElement.play();
