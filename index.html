@@ -29,27 +29,27 @@
       }
       #guideMask {
         position: absolute;
-        top: 50%;
+        top: 25rem;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 70%;
-        height: 50%;
+        width: 80%;
+        height: 90%;
         border: 3px dashed greenyellow;
       }
       #capture-btn {
         display: inline-block;
         border-radius: 50%;
-        width: 50px;
-        height: 50px;
+        width: 80px;
+        height: 80px;
         line-height: 50px;
         text-align: center;
-        font-size: 18px;
+        font-size: 35px;
         color: #fff;
         background-color: #007bff;
         border: none;
         cursor: pointer;
         position: absolute;
-        top: 100%;
+        top: 45rem;
         left: 50%;
         transform: translate(-50%, -50%);
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.26);
@@ -188,12 +188,13 @@
         canvas.height = videoElement.videoHeight;
         context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
         console.log(canvas.toDataURL());
+        alert("imagen guardada")
 
         // captura la imagen y la muestra en pantalla
-        const capturedImage = new Image();
-        capturedImage.setAttribute("id", "imgCapturada");
-        capturedImage.src = canvas.toDataURL("image/png");
-        document.body.appendChild(capturedImage);
+        // const capturedImage = new Image();
+        // capturedImage.setAttribute("id", "imgCapturada");
+        // capturedImage.src = canvas.toDataURL("image/png");
+        // document.body.appendChild(capturedImage);
       });
     </script>
   </body>
