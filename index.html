@@ -32,8 +32,8 @@
         top: 25rem;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 80%;
-        height: 90%;
+        width: 85%;
+        height: 95%;
         border: 3px dashed greenyellow;
       }
       #capture-btn {
@@ -86,6 +86,10 @@
   height: 100%;
   object-fit: cover;
       }
+      .result-img{
+        text-align: center;
+        left: 50%;
+      }
     </style>
   </head>
   <body>
@@ -102,11 +106,15 @@
         <div id="guideMask"></div>
         <button id="capture-btn"><i class="fa-solid fa-camera"></i></button>
       </div>
+      <div class="result-img">
+          <img id="img_res" alt="img__res" style="display: none;"/>
+      </div>
     </div>
     <script>
       var cmaeraContainer = document.getElementById("cameraContainer");
       var captureBtn = document.getElementById("capture-btn");
       var videoElement = document.getElementById("videoElement");
+      var capturedImage = document.getElementById("img_res")
 
       const getCameraSelection = async () => {
         const devices = await navigator.mediaDevices.enumerateDevices();
@@ -126,6 +134,8 @@
           cmaeraContainer.style.display = "flex";
           document.getElementById("btnCloseCam").style.display = "block";
           document.getElementById("btnOpenCam").style.display = "none";
+          capturedImage.src = "";
+          capturedImage.style.display = "none";
           //verifica los permisos
           if (
             "mediaDevices" in navigator &&
@@ -142,6 +152,9 @@
         cmaeraContainer.style.display = "none";
         document.getElementById("btnCloseCam").style.display = "none";
         document.getElementById("btnOpenCam").style.display = "block";
+        const tracks = videoElement.srcObject.getTracks();
+        tracks[0].stop();
+        videoElement.srcObject = null;
       }
 
       // pide los permisos
@@ -193,7 +206,9 @@
         // captura la imagen y la muestra en pantalla
         // const capturedImage = new Image();
         // capturedImage.setAttribute("id", "imgCapturada");
-        // capturedImage.src = canvas.toDataURL("image/png");
+        capturedImage.src = canvas.toDataURL("image/png");
+        cerrarCamara();
+        capturedImage.style.display = "block";
         // document.body.appendChild(capturedImage);
       });
     </script>
