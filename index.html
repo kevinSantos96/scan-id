@@ -3,219 +3,202 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-    />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="style.css" />
-    <title>Guía de centrado de objeto en cámara</title>
+    <title>Document</title>
     <style>
-      body {
-        margin:0px;
-        height: 100%;
+      .contenedor {
+        position: relative;
+        margin-top: 10px;
       }
-      #content{
-        width: auto;
-        align-items: center;
+
+      .camara {
         text-align: center;
       }
-      #cameraContainer {
-        position: relative;
-        width: 100%;
-        height: 100vh;
-        /* margin: 0 auto; */
-        /* border: 1px solid #000; */
-        flex-direction: column;
-      }
-      #guideMask {
+
+      .overlay {
         position: absolute;
-        top: 25rem;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 90%;
-        height: 25%;
-        border: 3px dashed greenyellow;
+        width: 300px;
+        height: 200px;
+        border: 2px dashed red;
+        z-index: 1;
       }
-      #capture-btn {
-        display: inline-block;
-        border-radius: 50%;
+      .circle_guide{
+        position: absolute;
         width: 80px;
         height: 80px;
-        line-height: 50px;
+        border: 2px dashed red;
+        z-index: 1;
+        border-radius: 50%;
+      }
+      .imagen {
         text-align: center;
-        font-size: 35px;
-        color: #fff;
-        background-color: #007bff;
-        border: none;
-        cursor: pointer;
-        position: absolute;
-        top: 45rem;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.26);
-      }
-      #btnOpenCam{
-        left: 50%;
-        width: 50%;
-        line-height: 2.5;
-        margin: 10px auto 10px;
-        background-color:#007bff; ;
-        font-size: 14px;
-        font-weight: 600;
-        color: #fff;
-        border: none;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.26);
-      }
-      #btnCloseCam{
-        top: 0;
-        left: 25%;
-        width: 50%;
-        line-height: 2.5;
         margin-top: 10px;
-        background-color: orangered;
-        position:absolute;
-        font-size: 14px;
-        font-weight: 600;
-        color: #fff;
-        border: none;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.26);
       }
-      #videoElement{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height:100%;
-        object-fit: cover;
+
+      .divBtn {
+        text-align: center;
       }
-      #img_res{
-        width: 98%;
-        margin: auto;
+
+      .btn {
+        background-color: #2e86c1;
+        color: white;
+        padding: 10px;
+        border: #2e86c1;
+        border-radius: 10px;
+      }
+
+      .btn:hover {
+        background-color: #1a5276;
+      }
+
+      .btnSave {
+        background-color: #1abc9c;
+        color: white;
+        padding: 10px;
+        border: #1abc9c;
+        border-radius: 10px;
+      }
+
+      .btnSave:hover {
+        background-color: #117a65;
       }
     </style>
   </head>
   <body>
-    <div id="content">
-      <div>
-        <button id="btnOpenCam">Abrir Camara</button>
+    <div class="divBtn">
+      <button class="btn" id="startCamera">Iniciar Cámara</button>
+    </div>
+
+    <div id="divContenedor" class="contenedor" hidden="hidden">
+      <div class="camara">
+        <video id="videoElement" playsinline autoplay></video>
       </div>
-      <div id="cameraContainer" style="display: none">
-        <video id="videoElement"  autoplay></video>
-        <canvas id="overlayCanvas"></canvas>
-        <div id="guideMask"></div>
-        <button id="capture-btn"><i class="fa-solid fa-camera"></i></button>
-        <div> 
-          <button id="btnCloseCam" onclick="cerrarCamara()" style="display: none;">
-            Cerrar Camera
-          </button>
-        </div>
-      </div>
-      <div class="result-img">
-          <img id="img_res" alt="img__res" style="display: none;" width="556" height="741"/>
-      </div>
+      <div id="guideline" class="overlay" hidden></div>
+      <div id="circleguide" class="circle_guide" hidden"></div>
+    </div>
+
+    <div class="imagen">
+      <img id="capturedImage" src="" alt="Captured Image" hidden="hidden" />
+    </div>
+
+    <div class="divBtn">
+      <button class="btnSave" id="captureButton" hidden>
+        Capturar y Mostrar
+      </button>
     </div>
     <script>
-      var cmaeraContainer = document.getElementById("cameraContainer");
-      var captureBtn = document.getElementById("capture-btn");
-      var videoElement = document.getElementById("videoElement");
-      var capturedImage = document.getElementById("img_res")
+      window.addEventListener("DOMContentLoaded", function () {
+        document
+          .getElementById("startCamera")
+          .addEventListener("click", startCamera);
+        document
+          .getElementById("captureButton")
+          .addEventListener("click", captureImage);
+        centrarRectanguloGuia();
+        window.addEventListener("resize", centrarRectanguloGuia);
+      });
 
-      const getCameraSelection = async () => {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter(
-          (device) => device.kind === "videoinput"
-        );
-        const options = videoDevices.map((videoDevice) => {
-          return `<option value="${videoDevice.deviceId}">${videoDevice.label}</option>`;
-        });
-        cameraOptions.innerHTML = options.join("");
-      };
+      function centrarRectanguloGuia() {
+        const videoElement = document.getElementById("videoElement");
+        const guideline = document.getElementById("guideline");
+        const circleGuide = document.getElementById("circleguide")
+        const videoRect = videoElement.getBoundingClientRect();
 
-      document
-        .getElementById("btnOpenCam")
-        .addEventListener("click", function () {
-          //mostrar elementos en pantalla
-          cmaeraContainer.style.display = "flex";
-          document.getElementById("btnCloseCam").style.display = "block";
-          document.getElementById("btnOpenCam").style.display = "none";
-          capturedImage.src = "";
-          capturedImage.style.display = "none";
-          //verifica los permisos
-          if (
-            "mediaDevices" in navigator &&
-            "getUserMedia" in navigator.mediaDevices
-          ) {
-            //alert("tiene permiso");
-            initCamera();
-          } else {
-            console.log("no tienes permiso");
-          }
-        });
-      function cerrarCamara() {
-        //mostar y ocultar elementos en pantalla
-        cmaeraContainer.style.display = "none";
-        document.getElementById("btnCloseCam").style.display = "none";
-        document.getElementById("btnOpenCam").style.display = "block";
-        const tracks = videoElement.srcObject.getTracks();
-        tracks[0].stop();
-        videoElement.srcObject = null;
+        const guidelineWidth = 300; // Ancho del rectángulo guía
+        const guidelineHeight = 200; // Altura del rectángulo guía
+        const circleWidth = 80
+        const circleHight =80
+
+        const leftOffset =videoRect.left + (videoRect.width - guidelineWidth) / 2 - 8;
+        const topOffset = videoRect.top + (videoRect.height - guidelineHeight) / 2 - 40;
+
+        const  leftOffsetCircle= videoRect.left + (videoRect.width - circleWidth) / 2 - 90;
+        const topOffsetCirlce= videoRect.top + (videoRect.height - circleHight) / 2 - 70;
+
+        guideline.style.left = leftOffset + "px";
+        guideline.style.top = topOffset + "px";
+
+        circleGuide.style.left = leftOffsetCircle + "px"
+        circleGuide.style.top = topOffsetCirlce + "px"
       }
 
-      // pide los permisos
-      function initCamera() {
+      let stream;
+
+      function startCamera() {
+        document.getElementById("divContenedor").hidden = false;
+        document.getElementById("capturedImage").hidden = true;
+        document.getElementById("captureButton").hidden = false;
+
         navigator.mediaDevices
           .getUserMedia({
+            audio: false,
             video: {
-              width: {
-                min: 1280,
+              width: 400,
+              height: 350,
+              facingMode: {
+                //habiltar movil, uso de la camara trasera
+               exact: "environment",
               },
-              height: {
-                min: 720,
-              },
-              facingMode: "environment",
             },
           })
-          .then((stream) => {
-            videoElement.srcObject = stream;
-            // videoElement.play();
+          .then(function (videoStream) {
+            const videoElement = document.getElementById("videoElement");
+            videoElement.srcObject = videoStream;
+            stream = videoStream;
+
+            videoElement.addEventListener("loadedmetadata", function () {
+              document
+                .getElementById("captureButton")
+                .removeAttribute("disabled");
+              centrarRectanguloGuia();
+              document.getElementById("guideline").hidden = false;
+              document.getElementById("circleguide").hidden = false;
+            });
           })
-          .catch((err) => {
-            console.error("Error accessing camera:", err);
-            //alert(err.message);
+          .catch(function (err) {
+            console.log("Ocurrió un error al acceder a la cámara: " + err);
           });
       }
 
-      // Actualizar la posición de la máscara de guía
-      function actualizarGuia(x, y) {
-        var guia = document.getElementById("guideMask");
-        guia.style.left = x + "px";
-        guia.style.top = y + "px";
-      }
-      //tomar y guardar la foto
-      captureBtn.addEventListener("click", function () {
-        //si existe el elemento lo elimina
-        if (document.getElementById("imgCapturada")) {
-          document
-            .querySelector("img")
-            .parentNode.removeChild(document.querySelector("img"));
-        }
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-        canvas.width = videoElement.videoWidth;
-        canvas.height = videoElement.videoHeight;
-        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-        //console.log(canvas.toDataURL()); //img base64
-        alert("imagen guardada")
+      function captureImage() {
+        const videoElement = document.getElementById("videoElement");
 
-        // captura la imagen y la muestra en pantalla
-        // const capturedImage = new Image();
-        // capturedImage.setAttribute("id", "imgCapturada");
-        capturedImage.src = canvas.toDataURL("image/png");
-        cerrarCamara();
-        capturedImage.style.display = "block";
-        // document.body.appendChild(capturedImage);
-      });
+        if (videoElement && stream) {
+          const videoWidth = videoElement.videoWidth;
+          const videoHeight = videoElement.videoHeight;
+
+          const guideline = document.getElementById("guideline");
+          const guidelineRect = guideline.getBoundingClientRect();
+          const videoRect = videoElement.getBoundingClientRect();
+          const guidelineX = guidelineRect.left - videoRect.left;
+          const guidelineY = guidelineRect.top - videoRect.top;
+          const guidelineWidth = guidelineRect.width;
+          const guidelineHeight = guidelineRect.height;
+
+          const croppedCanvas = document.createElement("canvas");
+          const croppedCtx = croppedCanvas.getContext("2d");
+          croppedCanvas.width = guidelineWidth;
+          croppedCanvas.height = guidelineHeight;
+
+          croppedCtx.drawImage(
+            videoElement,
+            guidelineX,
+            guidelineY,
+            guidelineWidth,
+            guidelineHeight,
+            0,
+            0,
+            guidelineWidth,
+            guidelineHeight
+          );
+
+          const capturedImage = document.getElementById("capturedImage");
+          capturedImage.src = croppedCanvas.toDataURL();
+          document.getElementById("divContenedor").hidden = true;
+          document.getElementById("capturedImage").hidden = false;
+          document.getElementById("captureButton").hidden = true;
+          //document.getElementById("captureButton").setAttribute("disabled", true);
+        }
+      }
     </script>
   </body>
 </html>
