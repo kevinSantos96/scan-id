@@ -24,7 +24,7 @@
       .circle_guide{
         position: absolute;
         width: 80px;
-        height: 80px;
+        height: 110px;
         border: 2px dashed red;
         z-index: 1;
         border-radius: 50%;
@@ -106,13 +106,13 @@
         const guidelineWidth = 300; // Ancho del rectángulo guía
         const guidelineHeight = 200; // Altura del rectángulo guía
         const circleWidth = 80
-        const circleHight =80
+        const circleHight =110
 
         const leftOffset =videoRect.left + (videoRect.width - guidelineWidth) / 2 - 8;
         const topOffset = videoRect.top + (videoRect.height - guidelineHeight) / 2 - 40;
 
         const  leftOffsetCircle= videoRect.left + (videoRect.width - circleWidth) / 2 - 90;
-        const topOffsetCirlce= videoRect.top + (videoRect.height - circleHight) / 2 - 70;
+        const topOffsetCirlce= videoRect.top + (videoRect.height - circleHight) / 2 - 90;
 
         guideline.style.left = leftOffset + "px";
         guideline.style.top = topOffset + "px";
