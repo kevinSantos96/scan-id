@@ -192,7 +192,7 @@
           );
 
           const capturedImage = document.getElementById("capturedImage");
-          capturedImage.src = croppedCanvas.toDataURL('image/png',0.8);
+          capturedImage.src = croppedCanvas.toDataURL('image/jpeg',1);
           document.getElementById("divContenedor").hidden = true;
           document.getElementById("capturedImage").hidden = false;
           document.getElementById("captureButton").hidden = true;
